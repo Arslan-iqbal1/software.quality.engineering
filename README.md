@@ -42,6 +42,7 @@ No dependencies are needed to run the app (zero-dependency static server). The o
 4. [Test Cases](docs/04-test-cases.md) — designed test cases with execution results
 5. [Defect Report](docs/05-defect-report.md) — defects found, root causes, fixes, retests
 6. [Test Summary Report](docs/06-test-summary-report.md) — metrics, coverage, exit-criteria verdict
+7. [Project Planner](docs/07-project-planner.md) — WBS, schedule, Gantt chart, milestones, resources, risks
 
 ## Quality approach in one line
 
