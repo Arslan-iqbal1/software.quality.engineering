@@ -3,9 +3,9 @@
 ## BookKart — Online Bookstore
 
 **Subject:** Software Quality Engineering
-**Student Name:** ______________________
-**Roll No:** ______________________
-**Department / University:** ______________________
+**Student Name:** M. Arslan
+**Roll No:** S24BSEEN1M01102
+**University:** The Islamia University of Bahawalpur
 
 ---
 
