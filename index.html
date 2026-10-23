@@ -20,6 +20,7 @@
       <div class="header-actions">
         <button id="themeToggle" class="icon-btn" aria-label="Toggle dark mode" title="Dark mode">🌙</button>
         <button id="wishButton" class="icon-btn" aria-label="Wishlist" title="Wishlist only">♥ <span id="wishCount" class="count alt">0</span></button>
+        <button id="trackButton" class="icon-btn track-btn" aria-label="Track your order" title="Track your order">📦 Track</button>
         <button id="cartButton" class="btn cart-btn" aria-label="Open cart">
           🛒 Cart <span id="cartCount" class="count">0</span>
         </button>
@@ -107,6 +108,20 @@
     <div class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
       <button id="closeModal" class="btn ghost modal-x" aria-label="Close">✕</button>
       <div id="modalContent"></div>
+    </div>
+  </div>
+
+  <div id="trackModal" class="modal" hidden>
+    <div class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="trackTitle">
+      <button id="closeTrack" class="btn ghost modal-x" aria-label="Close">✕</button>
+      <h3 id="trackTitle">📦 Track your order</h3>
+      <form id="trackForm">
+        <label>Order ID <input name="orderId" type="text" placeholder="BK-…" required></label>
+        <label>Phone number used at checkout <input name="phone" type="tel" placeholder="03001234567" required></label>
+        <button type="submit" class="btn primary full">Track</button>
+      </form>
+      <p class="err" id="trackError"></p>
+      <div id="trackResult"></div>
     </div>
   </div>
 
