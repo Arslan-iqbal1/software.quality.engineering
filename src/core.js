@@ -8,18 +8,18 @@
   'use strict';
 
   var CATALOG = [
-    { id: 'B01', title: 'The Silent Patient', author: 'Alex Michaelides', genre: 'Fiction', price: 1450, stock: 12, rating: 4.5 },
-    { id: 'B02', title: 'Atomic Habits', author: 'James Clear', genre: 'Self-Help', price: 1800, stock: 20, rating: 4.8 },
-    { id: 'B03', title: 'A Brief History of Time', author: 'Stephen Hawking', genre: 'Science', price: 1650, stock: 8, rating: 4.6 },
-    { id: 'B04', title: 'Clean Code', author: 'Robert C. Martin', genre: 'Technology', price: 3200, stock: 6, rating: 4.7 },
-    { id: 'B05', title: 'The Alchemist', author: 'Paulo Coelho', genre: 'Fiction', price: 1100, stock: 15, rating: 4.4 },
-    { id: 'B06', title: 'Sapiens', author: 'Yuval Noah Harari', genre: 'History', price: 2100, stock: 10, rating: 4.7 },
-    { id: 'B07', title: 'Deep Work', author: 'Cal Newport', genre: 'Self-Help', price: 1750, stock: 9, rating: 4.5 },
-    { id: 'B08', title: 'Introduction to Algorithms', author: 'Thomas H. Cormen', genre: 'Technology', price: 5500, stock: 4, rating: 4.6 },
-    { id: 'B09', title: 'Shah Jo Risalo', author: 'Shah Abdul Latif Bhittai', genre: 'Poetry', price: 950, stock: 14, rating: 4.9 },
-    { id: 'B10', title: 'The Psychology of Money', author: 'Morgan Housel', genre: 'Finance', price: 1600, stock: 18, rating: 4.7 },
-    { id: 'B11', title: 'Pakistan: A Hard Country', author: 'Anatol Lieven', genre: 'History', price: 2400, stock: 5, rating: 4.3 },
-    { id: 'B12', title: 'Thinking, Fast and Slow', author: 'Daniel Kahneman', genre: 'Science', price: 1950, stock: 11, rating: 4.5 }
+    { id: 'B01', title: 'The Silent Patient', author: 'Alex Michaelides', genre: 'Fiction', price: 1450, stock: 12, rating: 4.5, pages: 336, year: 2019, description: 'A famous painter stops speaking after a shocking act of violence. A psychotherapist becomes obsessed with uncovering her motive in this gripping psychological thriller.' },
+    { id: 'B02', title: 'Atomic Habits', author: 'James Clear', genre: 'Self-Help', price: 1800, stock: 20, rating: 4.8, pages: 320, year: 2018, description: 'Tiny changes, remarkable results. A proven framework for building good habits and breaking bad ones, backed by biology, psychology and neuroscience.' },
+    { id: 'B03', title: 'A Brief History of Time', author: 'Stephen Hawking', genre: 'Science', price: 1650, stock: 8, rating: 4.6, pages: 256, year: 1988, description: 'From the Big Bang to black holes — Hawking explores the deepest questions of the universe in language anyone can follow.' },
+    { id: 'B04', title: 'Clean Code', author: 'Robert C. Martin', genre: 'Technology', price: 3200, stock: 6, rating: 4.7, pages: 464, year: 2008, description: 'A handbook of agile software craftsmanship. Learn to write code that is readable, testable and easy to change — with real case studies.' },
+    { id: 'B05', title: 'The Alchemist', author: 'Paulo Coelho', genre: 'Fiction', price: 1100, stock: 15, rating: 4.4, pages: 208, year: 1988, description: 'Santiago, an Andalusian shepherd, travels to Egypt in search of treasure and discovers his Personal Legend. A beloved fable about following your dreams.' },
+    { id: 'B06', title: 'Sapiens', author: 'Yuval Noah Harari', genre: 'History', price: 2100, stock: 10, rating: 4.7, pages: 512, year: 2011, description: 'A brief history of humankind — how myths, money and empires united strangers and made Homo sapiens the rulers of the world.' },
+    { id: 'B07', title: 'Deep Work', author: 'Cal Newport', genre: 'Self-Help', price: 1750, stock: 9, rating: 4.5, pages: 304, year: 2016, description: 'Rules for focused success in a distracted world. Newport makes the case that deep, undistracted work is the superpower of the knowledge economy.' },
+    { id: 'B08', title: 'Introduction to Algorithms', author: 'Thomas H. Cormen', genre: 'Technology', price: 5500, stock: 4, rating: 4.6, pages: 1312, year: 2009, description: 'The definitive algorithms textbook used in universities worldwide — sorting, graphs, dynamic programming and much more, with pseudocode throughout.' },
+    { id: 'B09', title: 'Shah Jo Risalo', author: 'Shah Abdul Latif Bhittai', genre: 'Poetry', price: 950, stock: 14, rating: 4.9, pages: 380, year: 1740, description: 'The timeless Sindhi poetry of Shah Abdul Latif Bhittai — thirty surs of love, devotion and the human search for truth.' },
+    { id: 'B10', title: 'The Psychology of Money', author: 'Morgan Housel', genre: 'Finance', price: 1600, stock: 18, rating: 4.7, pages: 256, year: 2020, description: 'Nineteen short stories exploring the strange ways people think about wealth, greed and happiness. Doing well with money has surprisingly little to do with how smart you are.' },
+    { id: 'B11', title: 'Pakistan: A Hard Country', author: 'Anatol Lieven', genre: 'History', price: 2400, stock: 5, rating: 4.3, pages: 560, year: 2011, description: 'A deeply reported portrait of Pakistan — its people, politics, military and resilience — by a journalist who has covered the country for decades.' },
+    { id: 'B12', title: 'Thinking, Fast and Slow', author: 'Daniel Kahneman', genre: 'Science', price: 1950, stock: 11, rating: 4.5, pages: 512, year: 2011, description: 'Nobel laureate Daniel Kahneman explains the two systems that drive the way we think — fast intuition and slow logic — and how they shape our choices.' }
   ];
 
   var DISCOUNT_CODES = {
@@ -192,17 +192,42 @@
     return 'Rs ' + Number(n).toLocaleString('en-US');
   }
 
+  function stars(rating) {
+    var full = Math.round(rating);
+    var out = '';
+    for (var i = 0; i < 5; i++) out += i < full ? '★' : '☆';
+    return out;
+  }
+
+  function genreSlug(genre) {
+    return String(genre).toLowerCase().replace(/\s+/g, '-');
+  }
+
+  function initials(title) {
+    return title.split(/\s+/).slice(0, 2).map(function (w) { return w.charAt(0); }).join('').toUpperCase();
+  }
+
   function renderBookCard(book) {
     var stockLabel = book.stock === 0
       ? '<span class="badge out">Out of stock</span>'
       : '<span class="badge in">' + book.stock + ' in stock</span>';
+    var best = book.rating >= 4.7 ? '<span class="badge best">Bestseller</span>' : '';
     return '<article class="card" data-id="' + book.id + '">' +
-      '<div class="card-top"><span class="genre">' + book.genre + '</span>' + stockLabel + '</div>' +
-      '<h3>' + book.title + '</h3>' +
-      '<p class="author">by ' + book.author + '</p>' +
-      '<p class="rating">★ ' + book.rating.toFixed(1) + '</p>' +
-      '<div class="card-bottom"><span class="price">' + formatPrice(book.price) + '</span>' +
-      '<button class="btn add-btn" data-add="' + book.id + '"' + (book.stock === 0 ? ' disabled' : '') + '>Add to Cart</button></div>' +
+      '<div class="cover g-' + genreSlug(book.genre) + '" data-view="' + book.id + '" role="button" tabindex="0" aria-label="View ' + book.title + '">' +
+        '<span class="cover-initials">' + initials(book.title) + '</span>' +
+        '<span class="cover-title">' + book.title + '</span>' +
+      '</div>' +
+      '<div class="card-body">' +
+        '<div class="card-top"><span class="genre">' + book.genre + '</span>' + stockLabel + '</div>' +
+        '<h3 data-view="' + book.id + '">' + book.title + '</h3>' +
+        '<p class="author">by ' + book.author + '</p>' +
+        '<p class="rating"><span class="stars">' + stars(book.rating) + '</span> ' + book.rating.toFixed(1) + ' ' + best + '</p>' +
+        '<div class="card-bottom"><span class="price">' + formatPrice(book.price) + '</span>' +
+        '<div class="card-actions">' +
+          '<button class="btn wish-btn" data-wish="' + book.id + '" aria-label="Add to wishlist">♡</button>' +
+          '<button class="btn add-btn" data-add="' + book.id + '"' + (book.stock === 0 ? ' disabled' : '') + '>Add to Cart</button>' +
+        '</div></div>' +
+      '</div>' +
       '</article>';
   }
 
@@ -227,6 +252,8 @@
     validateCheckout: validateCheckout,
     placeOrder: placeOrder,
     formatPrice: formatPrice,
+    stars: stars,
+    genreSlug: genreSlug,
     renderBookCard: renderBookCard
   };
 
