@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BookKart Admin — Orders</title>
+<style>
+  :root { --accent:#4f46e5; --border:#e5e7eb; --muted:#6b7280; }
+  * { box-sizing: border-box; }
+  body { font-family: Inter, system-ui, sans-serif; margin: 0; background: #f8fafc; color: #111827; }
+  header { background: #111827; color: #fff; padding: 16px 22px; display: flex; justify-content: space-between; align-items: center; }
+  header h1 { font-size: 18px; margin: 0; }
+  main { max-width: 1000px; margin: 22px auto; padding: 0 16px; }
+  table { width: 100%; border-collapse: collapse; background: #fff; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+  th, td { text-align: left; padding: 11px 13px; border-bottom: 1px solid var(--border); font-size: 14px; vertical-align: top; }
+  th { background: #f1f5f9; }
+  select { padding: 6px 8px; border-radius: 8px; border: 1px solid var(--border); font: inherit; }
+  .btn { background: var(--accent); color: #fff; border: 0; padding: 9px 16px; border-radius: 10px; cursor: pointer; font-weight: 600; }
+  .muted { color: var(--muted); }
+  #msg { margin: 12px 0; font-weight: 600; }
+</style>
+</head>
+<body>
+<header>
+  <h1>📚 BookKart — Orders Admin</h1>
+  <button class="btn" id="refresh">↻ Refresh</button>
+</header>
+<main>
+  <p class="muted">New orders appear here the moment customers check out. Change a status and the customer's tracking page updates instantly. This page needs the store server (<code>npm start</code>).</p>
+  <p id="msg"></p>
+  <table>
+    <thead><tr><th>Order</th><th>Customer</th><th>Items</th><th>Total</th><th>Payment</th><th>Status</th><th>Placed</th></tr></thead>
+    <tbody id="rows"><tr><td colspan="7" class="muted">Loading…</td></tr></tbody>
+  </table>
+</main>
+<script>
+  var STATUSES = ['Placed', 'Confirmed', 'Dispatched', 'Delivered', 'Cancelled'];
+  function adminKey() {
+    var k = sessionStorage.getItem('bk-admin-key');
+    if (k === null) {
+      k = prompt('Admin key (leave empty if none is set on the server):', '') || '';
+      sessionStorage.setItem('bk-admin-key', k);
+    }
+    return k;
+  }
+  function headers() {
+    var h = { 'Content-Type': 'application/json' };
+    var k = adminKey();
+    if (k) h['x-admin-key'] = k;
+    return h;
+  }
+  function esc(s) {
+    return String(s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+  function load() {
+    fetch('/api/orders', { headers: headers() }).then(function (res) {
+      if (res.status === 401) {
+        sessionStorage.removeItem('bk-admin-key');
+        throw new Error('Wrong admin key — refresh and try again.');
+      }
+      if (!res.ok) throw new Error('Could not load orders (is the server running?)');
+      return res.json();
+    }).then(function (orders) {
+      var tb = document.getElementById('rows');
+      if (!orders.length) {
+        tb.innerHTML = '<tr><td colspan="7" class="muted">No orders yet.</td></tr>';
+        return;
+      }
+      tb.innerHTML = orders.map(function (o) {
+        var opts = STATUSES.map(function (st) {
+          return '<option' + (st === o.status ? ' selected' : '') + '>' + st + '</option>';
+        }).join('');
+        return '<tr><td><strong>' + esc(o.id) + '</strong></td><td>' + esc(o.customer) + '</td><td>' + o.items +
+          '</td><td>Rs ' + Number(o.total).toLocaleString('en-US') + '</td><td>' + esc(o.payment_method) +
+          '</td><td><select data-status="' + esc(o.id) + '">' + opts + '</select></td><td class="muted">' +
+          esc(String(o.placed_at).slice(0, 16).replace('T', ' ')) + '</td></tr>';
+      }).join('');
+      tb.querySelectorAll('select[data-status]').forEach(function (sel) {
+        sel.addEventListener('change', function () {
+          var id = sel.getAttribute('data-status');
+          fetch('/api/orders/' + encodeURIComponent(id) + '/status', {
+            method: 'PATCH', headers: headers(), body: JSON.stringify({ status: sel.value })
+          }).then(function (res) {
+            if (!res.ok) throw new Error('update failed');
+            document.getElementById('msg').textContent = '✅ ' + id + ' → ' + sel.value;
+          }).catch(function () {
+            document.getElementById('msg').textContent = '⚠️ Could not update ' + id;
+            load();
+          });
+        });
+      });
+    }).catch(function (e) {
+      document.getElementById('rows').innerHTML = '<tr><td colspan="7">' + esc(e.message) + '</td></tr>';
+    });
+  }
+  document.getElementById('refresh').addEventListener('click', load);
+  load();
+</script>
+</body>
+</html>
