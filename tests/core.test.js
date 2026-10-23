@@ -333,3 +333,74 @@ test('renderBookCard disables the buy button for an out-of-stock book', () => {
   assert.ok(html.includes('Out of stock'));
   assert.ok(html.includes('disabled'));
 });
+
+/* ---------- Sale pricing (Books Villa style compare-at prices) ---------- */
+
+test('every book has an MRP above its selling price and a sensible save percent', () => {
+  for (const b of catalog) {
+    assert.ok(b.mrp > b.price, b.id);
+    const pct = K.savePercent(b);
+    assert.ok(pct >= 20 && pct <= 50, b.id + ' ' + pct);
+  }
+  assert.equal(K.savePercent(K.findBook(catalog, 'B01')), 40); // 1450 vs 2400
+});
+
+/* ---------- Payment methods ---------- */
+
+const cardOk = { method: 'CARD', cardName: 'Ali Raza', cardNumber: '4242 4242 4242 4242', cardExpiry: '12/30', cardCvv: '123' };
+
+test('COD and bank transfer need no extra payment details', () => {
+  assert.equal(K.validatePayment({ method: 'COD' }).valid, true);
+  assert.equal(K.validatePayment({ method: 'BANK' }).valid, true);
+  assert.equal(K.validatePayment(null).valid, true); // defaults to COD
+  assert.equal(K.validatePayment({ method: 'BARTER' }).valid, false);
+});
+
+test('a valid card passes (Luhn check, future expiry, 3-digit CVV)', () => {
+  assert.equal(K.validatePayment(cardOk).valid, true);
+  assert.equal(K.validatePayment({ ...cardOk, cardNumber: '4242424242424242' }).valid, true);
+});
+
+test('a card number failing the Luhn check is rejected', () => {
+  const v = K.validatePayment({ ...cardOk, cardNumber: '4242424242424241' });
+  assert.equal(v.valid, false);
+  assert.ok(v.errors.cardNumber);
+});
+
+test('an expired card is rejected; the current month is accepted', () => {
+  assert.ok(K.validatePayment({ ...cardOk, cardExpiry: '01/20' }).errors.cardExpiry);
+  const now = new Date();
+  const mm = String(now.getMonth() + 1).padStart(2, '0');
+  const yy = String(now.getFullYear()).slice(2);
+  assert.equal(K.validatePayment({ ...cardOk, cardExpiry: mm + '/' + yy }).valid, true);
+});
+
+test('bad CVV and bad expiry format are rejected', () => {
+  assert.ok(K.validatePayment({ ...cardOk, cardCvv: '12' }).errors.cardCvv);
+  assert.ok(K.validatePayment({ ...cardOk, cardCvv: 'abcd' }).errors.cardCvv);
+  assert.ok(K.validatePayment({ ...cardOk, cardExpiry: '13/30' }).errors.cardExpiry);
+  assert.ok(K.validatePayment({ ...cardOk, cardExpiry: '1230' }).errors.cardExpiry);
+  assert.ok(K.validatePayment({ ...cardOk, cardName: 'Al' }).errors.cardName);
+});
+
+test('wallet payments require a valid Pakistani mobile number', () => {
+  assert.equal(K.validatePayment({ method: 'EASYPAISA', walletNumber: '03001234567' }).valid, true);
+  assert.equal(K.validatePayment({ method: 'JAZZCASH', walletNumber: '0300-1234567' }).valid, true);
+  assert.ok(K.validatePayment({ method: 'EASYPAISA', walletNumber: '12345' }).errors.walletNumber);
+});
+
+test('placeOrder records the payment method and masks the card number', () => {
+  const { order } = K.placeOrder({ B01: 1 }, catalog, validForm, null, cardOk);
+  assert.equal(order.payment.method, 'CARD');
+  assert.equal(order.payment.detail, 'Card ending in 4242');
+  assert.ok(!JSON.stringify(order).includes('4242424242424242'), 'full card number must never be stored');
+});
+
+test('placeOrder defaults to COD and rejects an invalid payment', () => {
+  const { order } = K.placeOrder({ B01: 1 }, catalog, validForm, null);
+  assert.equal(order.payment.method, 'COD');
+  assert.throws(
+    () => K.placeOrder({ B01: 1 }, catalog, validForm, null, { ...cardOk, cardCvv: '1' }),
+    (err) => err.message === 'VALIDATION_FAILED' && !!err.fields.cardCvv
+  );
+});
