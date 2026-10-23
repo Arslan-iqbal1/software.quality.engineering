@@ -99,6 +99,7 @@
     }
     saveJSON('bookkart-wishlist', Array.from(state.wishlist));
     $('wishCount').textContent = state.wishlist.size;
+  syncPaymentUI();
     renderBooks();
   }
 
@@ -186,7 +187,7 @@
           '<p class="modal-desc">' + book.description + '</p>' +
           '<p class="modal-meta">' + (book.stock > 0 ? book.stock + ' copies in stock' : 'Out of stock') + '</p>' +
           '<div class="modal-buy">' +
-            '<span class="modal-price">' + K.formatPrice(book.price) + '</span>' +
+            '<span class="modal-price">' + K.formatPrice(book.price) + (K.savePercent(book) > 0 ? ' <s class="mrp">' + K.formatPrice(book.mrp) + '</s> <span class="badge save">Save ' + K.savePercent(book) + '%</span>' : '') + '</span>' +
             '<div class="qty"><button id="modalDec" aria-label="Decrease quantity">−</button><span id="modalQty">1</span><button id="modalInc" aria-label="Increase quantity">+</button></div>' +
             '<button id="modalAdd" class="btn primary"' + (book.stock === 0 ? ' disabled' : '') + '>Add to Cart</button>' +
             '<button id="modalWish" class="btn wish-btn' + (state.wishlist.has(book.id) ? ' active' : '') + '" aria-label="Toggle wishlist">' + (state.wishlist.has(book.id) ? '♥' : '♡') + '</button>' +
@@ -275,6 +276,31 @@
     renderBooks();
   });
 
+  /* ---------- payment methods ---------- */
+  var payLabels = { COD: 'Place Order (Cash on Delivery)', CARD: 'Pay & Place Order', BANK: 'Place Order (Bank Transfer)', EASYPAISA: 'Pay with Easypaisa', JAZZCASH: 'Pay with JazzCash' };
+  function selectedMethod() {
+    var el = document.querySelector('input[name="paymentMethod"]:checked');
+    return el ? el.value : 'COD';
+  }
+  function syncPaymentUI() {
+    var method = selectedMethod();
+    $('payCard').hidden = method !== 'CARD';
+    $('payBank').hidden = method !== 'BANK';
+    $('payWallet').hidden = !(method === 'EASYPAISA' || method === 'JAZZCASH');
+    if (method === 'EASYPAISA') $('walletLabel').textContent = 'Easypaisa';
+    if (method === 'JAZZCASH') $('walletLabel').textContent = 'JazzCash';
+    $('tPayment').textContent = K.PAYMENT_METHODS[method].label;
+    $('placeOrderBtn').textContent = payLabels[method];
+    document.querySelectorAll('.pay-option').forEach(function (opt) {
+      var input = opt.querySelector('input');
+      opt.classList.toggle('selected', input && input.checked);
+    });
+  }
+  document.querySelectorAll('input[name="paymentMethod"]').forEach(function (radio) {
+    radio.addEventListener('change', syncPaymentUI);
+    radio.addEventListener('click', syncPaymentUI);
+  });
+
   /* ---------- promo ---------- */
   $('applyPromo').addEventListener('click', function () {
     var code = $('promoInput').value.trim();
@@ -307,9 +333,20 @@
       name: fd.get('name'), email: fd.get('email'), phone: fd.get('phone'),
       address: fd.get('address'), city: fd.get('city')
     };
+    var method = selectedMethod();
+    var payment = { method: method };
+    if (method === 'CARD') {
+      payment.cardName = fd.get('cardName');
+      payment.cardNumber = fd.get('cardNumber');
+      payment.cardExpiry = fd.get('cardExpiry');
+      payment.cardCvv = fd.get('cardCvv');
+    }
+    if (method === 'EASYPAISA' || method === 'JAZZCASH') {
+      payment.walletNumber = fd.get('walletNumber');
+    }
     document.querySelectorAll('[data-err]').forEach(function (p) { p.textContent = ''; });
     try {
-      var result = K.placeOrder(state.cart, state.catalog, form, state.promo);
+      var result = K.placeOrder(state.cart, state.catalog, form, state.promo, payment);
       state.catalog = result.catalog;
       state.cart = K.createCart();
       saveJSON('bookkart-cart', state.cart);
@@ -319,7 +356,8 @@
       var box = $('orderSuccess');
       box.hidden = false;
       box.innerHTML = '<strong>🎉 Order placed!</strong><br>Order ID: ' + result.order.id +
-        '<br>Total (Cash on Delivery): ' + K.formatPrice(result.order.totals.total) +
+        '<br>Payment: ' + esc(result.order.payment.label) + (result.order.payment.detail ? ' — ' + esc(result.order.payment.detail) : '') +
+        '<br>Total: ' + K.formatPrice(result.order.totals.total) +
         '<br>Thank you, ' + esc(result.order.customer.name) + '. Your books are on the way to ' + esc(result.order.customer.city) + '.';
       e.target.reset();
       toast('Order placed 🎉');
@@ -339,6 +377,7 @@
 
   /* ---------- init ---------- */
   $('wishCount').textContent = state.wishlist.size;
+  syncPaymentUI();
   renderBooks();
   renderCart();
 })();
