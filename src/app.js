@@ -277,6 +277,51 @@
     renderBooks();
   });
 
+  /* ---------- order tracking ---------- */
+  var TRACK_STEPS = ['Placed', 'Confirmed', 'Dispatched', 'Delivered'];
+  function openTrack() { $('trackModal').hidden = false; }
+  function closeTrack() { $('trackModal').hidden = true; }
+  $('trackButton').addEventListener('click', openTrack);
+  $('closeTrack').addEventListener('click', closeTrack);
+  $('trackModal').addEventListener('click', function (e) { if (e.target === $('trackModal')) closeTrack(); });
+  $('trackForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var fd = new FormData(e.target);
+    var id = String(fd.get('orderId') || '').trim();
+    var phone = String(fd.get('phone') || '').trim();
+    var errEl = $('trackError');
+    var resultEl = $('trackResult');
+    errEl.textContent = '';
+    resultEl.innerHTML = '';
+    if (typeof fetch !== 'function') {
+      errEl.textContent = 'Tracking needs the live store server.';
+      return;
+    }
+    fetch('/api/track/' + encodeURIComponent(id) + '?phone=' + encodeURIComponent(phone))
+      .then(function (res) {
+        if (!res.ok) throw new Error('notfound');
+        return res.json();
+      })
+      .then(function (o) {
+        var idx = TRACK_STEPS.indexOf(o.status);
+        var stepsHtml;
+        if (o.status === 'Cancelled') {
+          stepsHtml = '<p class="track-meta">❌ This order was <strong>cancelled</strong>.</p>';
+        } else {
+          stepsHtml = '<div class="track-steps">' + TRACK_STEPS.map(function (st, i) {
+            return '<div class="track-step' + (i <= idx ? ' done' : '') + '">' + st + '</div>';
+          }).join('') + '</div>';
+        }
+        resultEl.innerHTML = stepsHtml +
+          '<p class="track-meta">Order <strong>' + esc(o.id) + '</strong> — ' + o.items + ' item(s), ' +
+          K.formatPrice(o.total) + ' (' + esc(o.payment) + ')<br>Delivering to ' + esc(o.city) +
+          '<br>Status: <strong>' + esc(o.status) + '</strong></p>';
+      })
+      .catch(function () {
+        errEl.textContent = 'Order not found — check the order ID and the phone number you used at checkout.';
+      });
+  });
+
   /* ---------- payment methods ---------- */
   var payLabels = { COD: 'Place Order (Cash on Delivery)', CARD: 'Pay & Place Order', BANK: 'Place Order (Bank Transfer)', EASYPAISA: 'Pay with Easypaisa', JAZZCASH: 'Pay with JazzCash' };
   function selectedMethod() {
