@@ -95,3 +95,58 @@ test('static site still serves and the data directory is off-limits', async () =
   const api404 = await fetch(base + '/api/nope');
   assert.equal(api404.status, 404);
 });
+
+test('order tracking: right phone reveals status, wrong phone gets 404', async () => {
+  const ok = await fetch(base + '/api/track/' + orderId + '?phone=03001234567');
+  assert.equal(ok.status, 200);
+  const data = await ok.json();
+  assert.equal(data.id, orderId);
+  assert.equal(data.status, 'Placed');
+  assert.equal(data.total, 1100);
+  const wrong = await fetch(base + '/api/track/' + orderId + '?phone=03009999999');
+  assert.equal(wrong.status, 404);
+  const unknown = await fetch(base + '/api/track/BK-NOPE?phone=03001234567');
+  assert.equal(unknown.status, 404);
+});
+
+test('PATCH status updates the order and tracking reflects it instantly', async () => {
+  const res = await fetch(base + '/api/orders/' + orderId + '/status', {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ status: 'Dispatched' })
+  });
+  assert.equal(res.status, 200);
+  assert.equal((await res.json()).status, 'Dispatched');
+  const track = await (await fetch(base + '/api/track/' + orderId + '?phone=03001234567')).json();
+  assert.equal(track.status, 'Dispatched');
+  const bad = await fetch(base + '/api/orders/' + orderId + '/status', {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ status: 'Flying' })
+  });
+  assert.equal(bad.status, 400);
+});
+
+test('admin key gates order management when BOOKKART_ADMIN_KEY is set', async () => {
+  process.env.BOOKKART_ADMIN_KEY = 'test-secret';
+  const { createServer } = require('../server.js');
+  const srv = createServer(':memory:');
+  await new Promise((resolve) => srv.listen(0, '127.0.0.1', resolve));
+  const b2 = 'http://127.0.0.1:' + srv.address().port;
+  try {
+    const noKey = await fetch(b2 + '/api/orders');
+    assert.equal(noKey.status, 401);
+    const withKey = await fetch(b2 + '/api/orders', { headers: { 'x-admin-key': 'test-secret' } });
+    assert.equal(withKey.status, 200);
+    const patchNoKey = await fetch(b2 + '/api/orders/BK-X/status', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status: 'Confirmed' })
+    });
+    assert.equal(patchNoKey.status, 401);
+  } finally {
+    await new Promise((resolve) => srv.close(resolve));
+    srv.bookkartDb.close();
+    delete process.env.BOOKKART_ADMIN_KEY;
+  }
+});
