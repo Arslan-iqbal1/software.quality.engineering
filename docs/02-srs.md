@@ -1,6 +1,6 @@
 # Software Requirements Specification (SRS)
 
-## BookKart — Online Bookstore — Version 1.0
+## BookKart — Online Bookstore — Version 1.1 *(v1.1 adds the advanced front-end requirements FR-13…FR-16)*
 
 ### 1. Introduction
 
@@ -26,6 +26,10 @@
 | FR-10 | The system shall apply promo codes per BR-01 (below), case-insensitively, and shall report INVALID_CODE for unknown codes and MINIMUM_NOT_MET when the subtotal is below a code's minimum. | High |
 | FR-11 | The system shall charge delivery per BR-02 and display subtotal, discount, delivery fee and grand total before checkout. | High |
 | FR-12 | The system shall validate all checkout fields per BR-03, report every invalid field together, and place the order only when the cart is non-empty and the form is valid; a successful order shall decrement stock by the ordered quantities and return an order id. | High |
+| FR-13 | The system shall provide advanced filters — maximum price, minimum rating, in-stock only — that combine with search and genre filtering, plus a one-click filter reset. | Medium |
+| FR-14 | The system shall provide a wishlist: customers can mark/unmark books, see a wishlist count, and filter the catalog to wishlist items; the wishlist shall persist across page reloads. | Medium |
+| FR-15 | The system shall provide a quick-view panel for each book showing its description, year, page count, rating and stock, with quantity selection and add-to-cart. | Medium |
+| FR-16 | The cart shall persist across page reloads, and the interface shall offer a dark mode that is remembered between visits. | Low |
 
 ### 3. Business Rules
 
