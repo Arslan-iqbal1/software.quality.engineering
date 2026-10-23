@@ -43,7 +43,8 @@
     wishOnly: false,
     view: 'grid',
     modalBook: null,
-    modalQty: 1
+    modalQty: 1,
+    serverMode: false
   };
 
   var grid = $('bookGrid'), emptyState = $('emptyState'), resultInfo = $('resultInfo');
@@ -345,9 +346,15 @@
       payment.walletNumber = fd.get('walletNumber');
     }
     document.querySelectorAll('[data-err]').forEach(function (p) { p.textContent = ''; });
-    try {
-      var result = K.placeOrder(state.cart, state.catalog, form, state.promo, payment);
-      state.catalog = result.catalog;
+    var formEl = e.target;
+
+    function showErrors(fields) {
+      Object.keys(fields || {}).forEach(function (field) {
+        var p = document.querySelector('[data-err="' + field + '"]');
+        if (p) p.textContent = fields[field];
+      });
+    }
+    function finishOrder(order) {
       state.cart = K.createCart();
       saveJSON('bookkart-cart', state.cart);
       state.promo = null;
@@ -355,28 +362,74 @@
       $('promoMsg').textContent = '';
       var box = $('orderSuccess');
       box.hidden = false;
-      box.innerHTML = '<strong>🎉 Order placed!</strong><br>Order ID: ' + result.order.id +
-        '<br>Payment: ' + esc(result.order.payment.label) + (result.order.payment.detail ? ' — ' + esc(result.order.payment.detail) : '') +
-        '<br>Total: ' + K.formatPrice(result.order.totals.total) +
-        '<br>Thank you, ' + esc(result.order.customer.name) + '. Your books are on the way to ' + esc(result.order.customer.city) + '.';
-      e.target.reset();
+      box.innerHTML = '<strong>🎉 Order placed!</strong><br>Order ID: ' + order.id +
+        '<br>Payment: ' + esc(order.payment.label) + (order.payment.detail ? ' — ' + esc(order.payment.detail) : '') +
+        '<br>Total: ' + K.formatPrice(order.totals.total) +
+        '<br>Thank you, ' + esc(order.customer.name) + '. Your books are on the way to ' + esc(order.customer.city) + '.';
+      formEl.reset();
+      syncPaymentUI();
       toast('Order placed 🎉');
       renderBooks();
       renderCart();
-    } catch (err) {
-      if (err.message === 'EMPTY_CART') {
-        toast('Your cart is empty. Add a book first.');
-      } else if (err.message === 'VALIDATION_FAILED') {
-        Object.keys(err.fields).forEach(function (field) {
-          var p = document.querySelector('[data-err="' + field + '"]');
-          if (p) p.textContent = err.fields[field];
-        });
+    }
+    function localOrder() {
+      try {
+        var result = K.placeOrder(state.cart, state.catalog, form, state.promo, payment);
+        state.catalog = result.catalog;
+        finishOrder(result.order);
+      } catch (err) {
+        if (err.message === 'EMPTY_CART') toast('Your cart is empty. Add a book first.');
+        else if (err.message === 'VALIDATION_FAILED') showErrors(err.fields);
       }
+    }
+
+    if (state.serverMode && typeof fetch === 'function') {
+      fetch('/api/orders', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ items: state.cart, customer: form, promo: state.promo, payment: payment })
+      }).then(function (res) {
+        return res.json().then(function (data) { return { status: res.status, data: data }; });
+      }).then(function (r) {
+        if (r.status === 201) {
+          state.catalog = r.data.books;
+          finishOrder(r.data.order);
+        } else if (r.data && r.data.error === 'VALIDATION_FAILED') {
+          showErrors(r.data.fields);
+        } else if (r.data && r.data.error === 'EMPTY_CART') {
+          toast('Your cart is empty. Add a book first.');
+        } else if (r.data && r.data.error === 'OUT_OF_STOCK') {
+          toast('Sorry — an item in your cart just went out of stock.');
+          initServerMode();
+        } else {
+          localOrder();
+        }
+      }).catch(function () { localOrder(); });
+    } else {
+      localOrder();
     }
   });
 
+  /* ---------- server mode: live SQLite catalog when the API answers ---------- */
+  function initServerMode() {
+    if (typeof fetch !== 'function') return;
+    fetch('/api/books').then(function (res) {
+      if (!res.ok) throw new Error('no api');
+      return res.json();
+    }).then(function (books) {
+      if (!Array.isArray(books) || books.length === 0) return;
+      state.catalog = books;
+      state.serverMode = true;
+      var dm = $('dataMode');
+      if (dm) dm.textContent = 'Live database (SQLite)';
+      renderBooks();
+      renderCart();
+    }).catch(function () { /* static hosting: stay in local demo mode */ });
+  }
+
   /* ---------- init ---------- */
   $('wishCount').textContent = state.wishlist.size;
+  initServerMode();
   syncPaymentUI();
   renderBooks();
   renderCart();
