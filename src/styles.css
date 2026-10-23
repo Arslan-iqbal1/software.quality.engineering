@@ -224,3 +224,21 @@ form input { width: 100%; padding: 10px 12px; border: 1px solid var(--border); b
   .drawer-panel { max-width: 100%; }
   .cover { height: 110px; }
 }
+
+/* v3: sale pricing + payment methods */
+.mrp { color: var(--muted); font-weight: 500; font-size: 13.5px; margin-left: 5px; }
+.badge.save { background: #fee2e2; color: #b91c1c; margin-right: 5px; }
+[data-theme="dark"] .badge.save { background: #7f1d1d; color: #fecaca; }
+.pay-h { margin: 18px 0 8px; font-size: 15px; }
+.pay-methods { display: flex; flex-direction: column; gap: 8px; }
+.pay-option {
+  display: flex; align-items: center; gap: 10px; border: 1.5px solid var(--border);
+  border-radius: var(--radius); padding: 11px 13px; cursor: pointer; font-weight: 600; font-size: 14.5px;
+  margin-top: 0 !important;
+}
+.pay-option:hover { border-color: var(--accent); }
+.pay-option:has(input:checked) { border-color: var(--accent); background: var(--accent-soft); }
+.pay-option input { width: 18px; height: 18px; accent-color: var(--accent); margin: 0; }
+.pay-panel { margin-top: 12px; border: 1px dashed var(--border); border-radius: var(--radius); padding: 6px 14px 12px; }
+.pay-panel.info { padding: 14px; font-size: 14px; line-height: 1.65; background: var(--surface-2); }
+.pay-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
