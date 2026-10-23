@@ -23,6 +23,7 @@ const fs = require('fs');
 const path = require('path');
 const K = require('./src/core.js');
 const { openDb } = require('./src/db.js');
+const { notifyOrder } = require('./src/notify.js');
 
 const root = __dirname;
 const types = {
@@ -53,6 +54,10 @@ function readBody(req) {
 
 function createServer(dbPath) {
   const db = openDb(dbPath || process.env.BOOKKART_DB || path.join(root, 'data', 'bookkart.db'));
+  // When BOOKKART_ADMIN_KEY is set, order management (list + status
+  // changes) requires it in the x-admin-key header. Unset = local demo.
+  const adminKey = process.env.BOOKKART_ADMIN_KEY || '';
+  const isAdmin = (req) => !adminKey || req.headers['x-admin-key'] === adminKey;
 
   const server = http.createServer(async (req, res) => {
     const urlPath = decodeURIComponent(req.url.split('?')[0]);
@@ -63,7 +68,43 @@ function createServer(dbPath) {
     }
 
     if (urlPath === '/api/orders' && req.method === 'GET') {
+      if (!isAdmin(req)) return sendJson(res, 401, { error: 'ADMIN_KEY_REQUIRED' });
       return sendJson(res, 200, db.listOrders());
+    }
+
+    // Public order tracking: order id + the phone used at checkout.
+    const trackMatch = urlPath.match(/^\/api\/track\/([\w-]+)$/);
+    if (trackMatch && req.method === 'GET') {
+      const order = db.getOrder(trackMatch[1]);
+      const phone = (new URL(req.url, 'http://localhost').searchParams.get('phone') || '').replace(/\D/g, '');
+      const digits = (v) => String(v || '').replace(/\D/g, '');
+      const match = order && phone.length >= 10 &&
+        (digits(order.customer.phone) === phone || digits(order.customer.phone).endsWith(phone) || phone.endsWith(digits(order.customer.phone)));
+      if (!match) return sendJson(res, 404, { error: 'ORDER_NOT_FOUND' });
+      return sendJson(res, 200, {
+        id: order.id, status: order.status, total: order.totals.total,
+        items: order.items.reduce((n, i) => n + i.qty, 0),
+        city: order.customer.city, placedAt: order.placedAt, payment: order.payment.label
+      });
+    }
+
+    const statusMatch = urlPath.match(/^\/api\/orders\/([\w-]+)\/status$/);
+    if (statusMatch && req.method === 'PATCH') {
+      if (!isAdmin(req)) return sendJson(res, 401, { error: 'ADMIN_KEY_REQUIRED' });
+      let payload;
+      try {
+        payload = JSON.parse(await readBody(req));
+      } catch (e) {
+        return sendJson(res, 400, { error: 'INVALID_JSON' });
+      }
+      try {
+        const updated = db.updateOrderStatus(statusMatch[1], payload.status);
+        if (!updated) return sendJson(res, 404, { error: 'ORDER_NOT_FOUND' });
+        return sendJson(res, 200, updated);
+      } catch (err) {
+        if (err.message === 'INVALID_STATUS') return sendJson(res, 400, { error: 'INVALID_STATUS' });
+        throw err;
+      }
     }
 
     const orderMatch = urlPath.match(/^\/api\/orders\/([\w-]+)$/);
@@ -91,6 +132,7 @@ function createServer(dbPath) {
           address: String(customer.address || '').trim(),
           city: String(customer.city || '').trim()
         }, payload.promo || null);
+        notifyOrder(saved).catch(() => { /* already logged per channel */ });
         return sendJson(res, 201, { order: saved, books: db.listBooks() });
       } catch (err) {
         if (err.message === 'VALIDATION_FAILED') {
