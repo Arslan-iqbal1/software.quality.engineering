@@ -4,6 +4,8 @@ A complete **Software Quality Engineering (SQE)** project: a working online book
 
 ## Features
 
+**New in v2 — advanced front end:** filters sidebar (price range, minimum rating, in-stock, wishlist-only), wishlist with persistence, quick-view book modal with descriptions, dark mode, grid/list view toggle, toast notifications, and a cart that survives page reloads.
+
 - 📚 Browse a 12-book catalog (fiction, science, technology, self-help, history, poetry, finance)
 - 🔍 Live search by title or author, genre filter, and 4 sort orders
 - 🛒 Cart with stock-safe quantities (you can never order more than the stock)
@@ -15,7 +17,7 @@ A complete **Software Quality Engineering (SQE)** project: a working online book
 
 ```bash
 npm start          # serves the app at http://localhost:3000
-npm test           # runs the full automated suite (60 tests)
+npm test           # runs the full automated suite (69 tests)
 ```
 
 No dependencies are needed to run the app (zero-dependency static server). The only dev dependency is `jsdom`, used by the UI integration tests.
@@ -31,6 +33,7 @@ No dependencies are needed to run the app (zero-dependency static server). The o
 | `server.js` | Zero-dependency static file server |
 | `tests/core.test.js` | 50 unit tests — equivalence partitioning, boundary value analysis, decision tables |
 | `tests/ui.test.js` | 10 UI integration tests (jsdom) driving the real page |
+| `tests/ui-advanced.test.js` | 9 tests for the v2 front end — wishlist, filters, modal, dark mode, persistence |
 | `docs/` | The complete SQE document set (below) |
 | `.github/workflows/ci.yml` | CI quality gate — the suite runs on every push |
 
@@ -46,4 +49,4 @@ No dependencies are needed to run the app (zero-dependency static server). The o
 
 ## Quality approach in one line
 
-Every rule that can break (stock limits, discount thresholds, delivery boundaries, validation) lives in pure functions in `core.js` and is proven by an automated test — including the boundary values on both sides of every threshold. Testing found **3 real defects** during development (see the defect report); all are fixed and retested. Current status: **60/60 tests passing**.
+Every rule that can break (stock limits, discount thresholds, delivery boundaries, validation) lives in pure functions in `core.js` and is proven by an automated test — including the boundary values on both sides of every threshold. Testing found **3 real defects** during development (see the defect report); all are fixed and retested. Current status: **69/69 tests passing**.
