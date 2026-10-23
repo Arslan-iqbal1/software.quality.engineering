@@ -80,7 +80,7 @@ No production dependencies are used at all, which removes an entire class of sup
 
 ## 7. Results (summary)
 
-- **95 automated tests executed: 95 passed, 0 failed** (59 unit + 25 UI integration + 5 database + 6 API tests, covering the v2 advanced front end, the v3 payment methods and sale pricing, and v4 SQLite persistence: transactional order storage, rollback, and persistence across server restarts)
+- **104 automated tests executed: 104 passed, 0 failed** (59 unit + 25 UI integration + 6 database + 9 API + 5 notification tests, covering the v2 advanced front end, the v3 payment methods and sale pricing, v4 SQLite persistence, and v5 real-store features: owner order notifications, order status lifecycle, customer tracking and an admin orders page)
 - **3 defects found** during development (1 by inspection, 1 during integration testing, 1 in the test tooling itself) — **all fixed and retested**, 0 open
 - **100% of functional requirements** covered by automated tests
 - Full detail: [Test Summary Report](06-test-summary-report.md) and [Defect Report](05-defect-report.md)
