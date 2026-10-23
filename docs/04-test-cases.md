@@ -3,7 +3,7 @@
 ## BookKart — Online Bookstore
 
 **Executed:** 22 October 2026 · **Environment:** Node.js v24.20.0, jsdom · **Result: all cases PASS**
-Cases are automated in `tests/core.test.js`, `tests/ui.test.js` and `tests/ui-advanced.test.js` (69 automated checks in total), plus server smoke checks in TC-50.
+Cases are automated in `tests/core.test.js`, `tests/ui.test.js` and `tests/ui-advanced.test.js` (84 automated checks in total), plus server smoke checks in TC-50.
 
 ### A. Catalog, Search, Filter, Sort (FR-01…FR-04)
 
@@ -93,3 +93,22 @@ Cases are automated in `tests/core.test.js`, `tests/ui.test.js` and `tests/ui-ad
 | TC-57 | Add from modal + persistence | In modal set qty 2, Add to Cart | Cart badge = 2; cart saved in localStorage | As expected | ✅ Pass |
 | TC-58 | Dark mode | Click theme toggle twice | Theme switches dark → light; choice persisted | As expected | ✅ Pass |
 | TC-59 | List view toggle | Click list view, then grid view | Grid gains/loses the list-view layout class | As expected | ✅ Pass |
+
+### G. Sale Pricing and Payment Methods — v3
+
+| ID | Test case | Input / steps | Expected result | Actual result | Status |
+|---|---|---|---|---|---|
+| TC-60 | MRP & Save % | Read catalog | Every book: MRP > price, Save % between 20–50 (B01 = 40%) | As expected | ✅ Pass |
+| TC-61 | COD / Bank need no details | validatePayment COD, BANK, null | All valid; unknown method rejected | As expected | ✅ Pass |
+| TC-62 | Valid card | 4242… card, future expiry, CVV 123 | Valid | As expected | ✅ Pass |
+| TC-63 | Luhn failure | Card …4241 | cardNumber error | As expected | ✅ Pass |
+| TC-64 | Expiry rules | Expired 01/20; current month | Expired rejected; current month accepted | As expected | ✅ Pass |
+| TC-65 | CVV / format rules | CVV "12", expiry "13/30", short card name | Each rejected with its own error | As expected | ✅ Pass |
+| TC-66 | Wallet validation | Easypaisa/JazzCash numbers, valid + invalid | Valid accepted; "12345" rejected | As expected | ✅ Pass |
+| TC-67 | Order records masked payment | Place card order | payment = CARD, detail "Card ending in 4242"; full number nowhere in the order | As expected | ✅ Pass |
+| TC-68 | Default payment UI | Load page, open cart | COD selected; all panels hidden; totals show "Cash on Delivery" | As expected | ✅ Pass |
+| TC-69 | Card panel UI | Select Card | Card panel shows; button becomes "Pay & Place Order"; totals show "Debit / Credit Card" | As expected | ✅ Pass |
+| TC-70 | Invalid card blocks order (UI) | Submit with Luhn-failing card | cardNumber error shown; no order placed | As expected | ✅ Pass |
+| TC-71 | Valid card order (UI) | Submit with valid card | Success shows method + "4242", never the full number | As expected | ✅ Pass |
+| TC-72 | Wallet panel UI | Select Easypaisa, then JazzCash | Wallet panel shows; label switches Easypaisa → JazzCash | As expected | ✅ Pass |
+| TC-73 | Bank panel UI | Select Bank Transfer | Panel shows Meezan Bank details + order-ID reference note | As expected | ✅ Pass |
