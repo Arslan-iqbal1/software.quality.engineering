@@ -1,6 +1,6 @@
 # Software Requirements Specification (SRS)
 
-## BookKart — Online Bookstore — Version 1.3 *(v1.1 added FR-13…FR-16; v1.2 added FR-17/FR-18; v1.3 adds database persistence FR-19)*
+## BookKart — Online Bookstore — Version 1.4 *(v1.1 added FR-13…FR-16; v1.2 added FR-17/FR-18; v1.3 added FR-19; v1.4 adds notifications and tracking FR-20/FR-21)*
 
 ### 1. Introduction
 
@@ -33,6 +33,8 @@
 | FR-17 | At checkout the customer shall choose one payment method — Cash on Delivery, Debit/Credit Card, Bank Transfer, Easypaisa or JazzCash — validated per BR-04. The order shall record the method; card numbers shall be stored and displayed masked (last 4 digits only). | High |
 | FR-18 | Each book shall display a sale price with its struck-through MRP and a computed "Save %" badge. | Medium |
 | FR-19 | When run with the Node server, the system shall persist the catalog, customers and orders in an SQLite database (seeded from the core catalog on first run). Saving an order (customer, order, line items, stock update) shall be a single transaction. The database shall be the source of truth for stock. On static hosting without the API, the system shall fall back to in-browser demo data. | High |
+| FR-20 | When an order is saved, the system shall notify the store owner on every configured channel (ntfy.sh push, Telegram, webhook URL — set by environment variables). A failing channel shall be logged and shall never block or fail the order. | Medium |
+| FR-21 | Each order shall carry a status (Placed, Confirmed, Dispatched, Delivered, Cancelled). The owner shall update it from an admin page (protected by an admin key when one is configured); customers shall track their order's status with the order ID plus the phone number used at checkout — a wrong phone shall return no information. | High |
 
 ### 3. Business Rules
 
