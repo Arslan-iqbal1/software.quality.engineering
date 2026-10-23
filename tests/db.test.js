@@ -82,3 +82,16 @@ test('orders and stock survive closing and reopening the database file', () => {
   const first = db.listOrders()[1];
   assert.ok(db.getOrder(first.id));
 });
+
+test('order status lifecycle: defaults to Placed and updates through valid statuses', () => {
+  const { order, catalog } = K.placeOrder({ B05: 1 }, db.listBooks(), form, null, { method: 'COD' });
+  db.saveOrder(order, catalog, form, null);
+  assert.equal(db.getOrder(order.id).status, 'Placed');
+  assert.equal(db.updateOrderStatus(order.id, 'Confirmed').status, 'Confirmed');
+  assert.equal(db.updateOrderStatus(order.id, 'Delivered').status, 'Delivered');
+  assert.throws(() => db.updateOrderStatus(order.id, 'Flying'), /INVALID_STATUS/);
+  assert.equal(db.updateOrderStatus('BK-NOPE', 'Placed'), null);
+  // list view carries the status too
+  const row = db.listOrders().find((o) => o.id === order.id);
+  assert.equal(row.status, 'Delivered');
+});
