@@ -3,7 +3,7 @@
 ## BookKart — Online Bookstore
 
 **Executed:** 22 October 2026 · **Environment:** Node.js v24.20.0, jsdom · **Result: all cases PASS**
-Cases are automated in `tests/core.test.js`, `tests/ui.test.js` and `tests/ui-advanced.test.js` (84 automated checks in total), plus server smoke checks in TC-50.
+Cases are automated in `tests/core.test.js`, `tests/ui.test.js` and `tests/ui-advanced.test.js` (95 automated checks in total), plus server smoke checks in TC-50.
 
 ### A. Catalog, Search, Filter, Sort (FR-01…FR-04)
 
@@ -112,3 +112,19 @@ Cases are automated in `tests/core.test.js`, `tests/ui.test.js` and `tests/ui-ad
 | TC-71 | Valid card order (UI) | Submit with valid card | Success shows method + "4242", never the full number | As expected | ✅ Pass |
 | TC-72 | Wallet panel UI | Select Easypaisa, then JazzCash | Wallet panel shows; label switches Easypaisa → JazzCash | As expected | ✅ Pass |
 | TC-73 | Bank panel UI | Select Bank Transfer | Panel shows Meezan Bank details + order-ID reference note | As expected | ✅ Pass |
+
+### H. SQLite Database and HTTP API — v4
+
+| ID | Test case | Input / steps | Expected result | Actual result | Status |
+|---|---|---|---|---|---|
+| TC-74 | Database seeding | Open a fresh database file | books table seeded with the 12-book catalog (price, MRP, stock, description) | As expected | ✅ Pass |
+| TC-75 | Transactional order save | Place an order, save it | Customer, order, items stored; stock decremented by the ordered qty | As expected | ✅ Pass |
+| TC-76 | Returning customer | Second order with the same email | Customer row updated, not duplicated; promo code recorded | As expected | ✅ Pass |
+| TC-77 | Rollback on failure | Save an order containing a non-existent book | Error raised; no partial order; stock unchanged | As expected | ✅ Pass |
+| TC-78 | Persistence across reopen | Close and reopen the database file | Orders and stock intact; catalog not reseeded | As expected | ✅ Pass |
+| TC-79 | GET /api/books | HTTP GET | 200 with the 12-book catalog | As expected | ✅ Pass |
+| TC-80 | POST /api/orders (COD) | Order 1 × B09, valid form | 201, order BK-…, total Rs 1,100; stock −1 in the response | As expected | ✅ Pass |
+| TC-81 | GET /api/orders + /:id | After TC-80 | List shows the order; detail returns its line items; unknown ID → 404 | As expected | ✅ Pass |
+| TC-82 | API validation errors | Invalid email; empty cart; Luhn-failing card | 400 VALIDATION_FAILED with field errors; 400 EMPTY_CART | As expected | ✅ Pass |
+| TC-83 | Static + API coexistence | GET / and /api/nope | Homepage serves; unknown API route → 404 JSON | As expected | ✅ Pass |
+| TC-84 | Data directory guard | GET /data/bookkart.db | 403 Forbidden — the database file is never served | As expected | ✅ Pass |
