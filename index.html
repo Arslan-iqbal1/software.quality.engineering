@@ -35,6 +35,7 @@
         <span class="chip">🏷️ STUDENT10 — 10% off</span>
         <span class="chip">🏷️ BOOKWORM20 — 20% off over Rs 2,000</span>
         <span class="chip">🚚 Free delivery over Rs 1,000</span>
+        <span class="chip">💳 COD · Card · Bank · Easypaisa · JazzCash</span>
       </div>
     </div>
   </section>
@@ -128,6 +129,7 @@
         <div><span>Subtotal</span><strong id="tSubtotal">Rs 0</strong></div>
         <div><span>Discount</span><strong id="tDiscount">− Rs 0</strong></div>
         <div><span>Delivery</span><strong id="tDelivery">Rs 0</strong></div>
+        <div><span>Payment</span><strong id="tPayment">Cash on Delivery</strong></div>
         <div class="grand"><span>Total</span><strong id="tTotal">Rs 0</strong></div>
         <p class="hint">Free delivery on orders of Rs 1,000 or more (after discount).</p>
       </div>
@@ -144,7 +146,51 @@
         <p class="err" data-err="address"></p>
         <label>City <input name="city" type="text" autocomplete="address-level2"></label>
         <p class="err" data-err="city"></p>
-        <button type="submit" class="btn primary full">Place Order (Cash on Delivery)</button>
+
+        <h4 class="pay-h">Payment Method</h4>
+        <div class="pay-methods" role="radiogroup" aria-label="Payment method">
+          <label class="pay-option"><input type="radio" name="paymentMethod" value="COD" checked> <span>💵 Cash on Delivery</span></label>
+          <label class="pay-option"><input type="radio" name="paymentMethod" value="CARD"> <span>💳 Debit / Credit Card</span></label>
+          <label class="pay-option"><input type="radio" name="paymentMethod" value="BANK"> <span>🏦 Bank Transfer</span></label>
+          <label class="pay-option"><input type="radio" name="paymentMethod" value="EASYPAISA"> <span>📱 Easypaisa</span></label>
+          <label class="pay-option"><input type="radio" name="paymentMethod" value="JAZZCASH"> <span>📱 JazzCash</span></label>
+        </div>
+        <p class="err" data-err="payment"></p>
+
+        <div id="payCard" class="pay-panel" hidden>
+          <label>Name on card <input name="cardName" type="text" autocomplete="cc-name"></label>
+          <p class="err" data-err="cardName"></p>
+          <label>Card number <input name="cardNumber" type="text" inputmode="numeric" placeholder="4242 4242 4242 4242" autocomplete="cc-number"></label>
+          <p class="err" data-err="cardNumber"></p>
+          <div class="pay-row">
+            <div>
+              <label>Expiry (MM/YY) <input name="cardExpiry" type="text" placeholder="12/30" autocomplete="cc-exp"></label>
+              <p class="err" data-err="cardExpiry"></p>
+            </div>
+            <div>
+              <label>CVV <input name="cardCvv" type="password" inputmode="numeric" placeholder="123" autocomplete="cc-csc"></label>
+              <p class="err" data-err="cardCvv"></p>
+            </div>
+          </div>
+          <p class="hint">Demo checkout — no real payment is charged.</p>
+        </div>
+
+        <div id="payBank" class="pay-panel info" hidden>
+          Transfer the order total to:<br>
+          <strong>BookKart — Meezan Bank</strong><br>
+          IBAN: PK36 MEZN 0001 0101 0101 0101<br>
+          Use your <strong>order ID as the reference</strong>. Your books are dispatched after the transfer is received.
+        </div>
+
+        <div id="payWallet" class="pay-panel" hidden>
+          <label><span id="walletLabel">Easypaisa</span> mobile account number
+            <input name="walletNumber" type="tel" placeholder="03001234567">
+          </label>
+          <p class="err" data-err="walletNumber"></p>
+          <p class="hint">You will receive a payment approval prompt on this number. (Demo — no real charge.)</p>
+        </div>
+
+        <button id="placeOrderBtn" type="submit" class="btn primary full">Place Order (Cash on Delivery)</button>
       </form>
       <div id="orderSuccess" class="success" hidden></div>
     </div>
