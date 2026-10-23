@@ -3,7 +3,7 @@
 ## BookKart — Online Bookstore
 
 **Executed:** 22 October 2026 · **Environment:** Node.js v24.20.0, jsdom · **Result: all cases PASS**
-Cases are automated in `tests/core.test.js`, `tests/ui.test.js` and `tests/ui-advanced.test.js` (95 automated checks in total), plus server smoke checks in TC-50.
+Cases are automated in `tests/core.test.js`, `tests/ui.test.js` and `tests/ui-advanced.test.js` (104 automated checks in total), plus server smoke checks in TC-50.
 
 ### A. Catalog, Search, Filter, Sort (FR-01…FR-04)
 
@@ -128,3 +128,16 @@ Cases are automated in `tests/core.test.js`, `tests/ui.test.js` and `tests/ui-ad
 | TC-82 | API validation errors | Invalid email; empty cart; Luhn-failing card | 400 VALIDATION_FAILED with field errors; 400 EMPTY_CART | As expected | ✅ Pass |
 | TC-83 | Static + API coexistence | GET / and /api/nope | Homepage serves; unknown API route → 404 JSON | As expected | ✅ Pass |
 | TC-84 | Data directory guard | GET /data/bookkart.db | 403 Forbidden — the database file is never served | As expected | ✅ Pass |
+
+### I. Owner Notifications, Order Status and Tracking — v5
+
+| ID | Test case | Input / steps | Expected result | Actual result | Status |
+|---|---|---|---|---|---|
+| TC-85 | No channels configured | notifyOrder with empty env | Resolves to an empty result; no error | As expected | ✅ Pass |
+| TC-86 | Channel resolution | Env with ntfy topic, Telegram pair, webhook | 3 channels resolved; Telegram ignored unless both token and chat id are set | As expected | ✅ Pass |
+| TC-87 | Message content | Build the notification for a sample order | Contains order ID, total, customer name/city, item lines | As expected | ✅ Pass |
+| TC-88 | Delivery to all channels | Injected sender, ntfy + webhook configured | Both posted; ntfy gets text, webhook gets order.created JSON | As expected | ✅ Pass |
+| TC-89 | Failure isolation | Sender throws | Result marks the channel failed; the call never rejects | As expected | ✅ Pass |
+| TC-90 | Status lifecycle | New order → Confirmed → Delivered; invalid status; unknown order | Defaults to Placed; valid updates stored; invalid rejected; unknown → null | As expected | ✅ Pass |
+| TC-91 | Tracking privacy | GET /api/track/:id with right phone, wrong phone, unknown id | Right phone → status + summary; wrong phone and unknown id → 404 | As expected | ✅ Pass |
+| TC-92 | Status API + admin gate | PATCH status; repeat with BOOKKART_ADMIN_KEY set, with/without the header | Update succeeds and tracking reflects it; gated calls without the key → 401, with it → 200 | As expected | ✅ Pass |
