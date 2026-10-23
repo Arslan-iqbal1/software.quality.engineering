@@ -14,12 +14,13 @@ A complete **Software Quality Engineering (SQE)** project: a working online book
 - ✅ Checkout with full field validation (name, email, Pakistani mobile format, address, city) and order placement that decrements stock
 - 💳 **Payment methods** — Cash on Delivery, Debit/Credit Card (Luhn + expiry + CVV validated, number stored masked only), Bank Transfer, Easypaisa and JazzCash
 - 🔖 Sale pricing like the big stores: every book shows a struck-through MRP and a **Save %** badge
+- 🗄️ **SQLite database** — run `npm start` and orders, customers and stock persist in `data/bookkart.db` via the JSON API; on GitHub Pages (static) the store automatically runs on in-browser demo data instead
 
 ## Quick start
 
 ```bash
 npm start          # serves the app at http://localhost:3000
-npm test           # runs the full automated suite (84 tests)
+npm test           # runs the full automated suite (95 tests)
 ```
 
 No dependencies are needed to run the app (zero-dependency static server). The only dev dependency is `jsdom`, used by the UI integration tests.
@@ -31,12 +32,16 @@ No dependencies are needed to run the app (zero-dependency static server). The o
 | `index.html` | App page (semantic, accessible, mobile-friendly) |
 | `src/core.js` | **All business logic as pure functions** — catalog, search, cart, discounts, delivery, validation, orders. Runs identically in browser and Node. |
 | `src/app.js` | UI wiring only — reads input, calls `core.js`, renders |
+| `src/db.js` | **SQLite persistence** (Node's built-in `node:sqlite`) — books, customers, orders, order_items; transactional order saving |
+| `server.js` | Static server + JSON API (`/api/books`, `/api/orders`) backed by SQLite; the UI uses it automatically when reachable and falls back to in-browser demo data on static hosting |
 | `src/styles.css` | Styling (Inter font, 15px radius design system) |
 | `server.js` | Zero-dependency static file server |
 | `tests/core.test.js` | 50 unit tests — equivalence partitioning, boundary value analysis, decision tables |
 | `tests/ui.test.js` | 10 UI integration tests (jsdom) driving the real page |
 | `tests/ui-advanced.test.js` | 9 tests for the v2 front end — wishlist, filters, modal, dark mode, persistence |
 | `tests/ui-payment.test.js` | 6 tests for payment method selection, panels and masked card checkout |
+| `tests/db.test.js` | 5 tests for the SQLite layer — seeding, transactional saves, rollback, persistence across reopen |
+| `tests/api.test.js` | 6 tests for the HTTP API — catalog, order placement, validation errors, stock decrement |
 | `docs/` | The complete SQE document set (below) |
 | `.github/workflows/ci.yml` | CI quality gate — the suite runs on every push |
 
@@ -52,4 +57,4 @@ No dependencies are needed to run the app (zero-dependency static server). The o
 
 ## Quality approach in one line
 
-Every rule that can break (stock limits, discount thresholds, delivery boundaries, validation) lives in pure functions in `core.js` and is proven by an automated test — including the boundary values on both sides of every threshold. Testing found **3 real defects** during development (see the defect report); all are fixed and retested. Current status: **84/84 tests passing**.
+Every rule that can break (stock limits, discount thresholds, delivery boundaries, validation) lives in pure functions in `core.js` and is proven by an automated test — including the boundary values on both sides of every threshold. Testing found **3 real defects** during development (see the defect report); all are fixed and retested. Current status: **95/95 tests passing**.
