@@ -26,6 +26,26 @@ const { openDb } = require('./src/db.js');
 const { notifyOrder } = require('./src/notify.js');
 
 const root = __dirname;
+
+/* Minimal .env support (no dependencies): KEY=VALUE lines from a .env
+   file next to server.js fill in any environment variables that are
+   not already set. Real environment variables always win. */
+function loadDotEnv(file) {
+  try {
+    const text = fs.readFileSync(file || path.join(root, '.env'), 'utf8');
+    for (const line of text.split(/\r?\n/)) {
+      const m = line.match(/^\s*([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(.*)\s*$/);
+      if (!m || line.trim().startsWith('#')) continue;
+      const key = m[1];
+      let value = m[2];
+      if ((value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'") && value.endsWith("'"))) {
+        value = value.slice(1, -1);
+      }
+      if (process.env[key] === undefined) process.env[key] = value;
+    }
+  } catch (e) { /* no .env file — configuration comes from the real environment */ }
+}
+loadDotEnv();
 const types = {
   '.html': 'text/html; charset=utf-8',
   '.css': 'text/css; charset=utf-8',
@@ -173,4 +193,4 @@ if (require.main === module) {
   createServer().listen(port, () => console.log('BookKart running at http://localhost:' + port));
 }
 
-module.exports = { createServer };
+module.exports = { createServer, loadDotEnv };
