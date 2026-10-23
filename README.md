@@ -22,7 +22,7 @@ A complete **Software Quality Engineering (SQE)** project: a working online book
 
 ```bash
 npm start          # serves the app at http://localhost:3000
-npm test           # runs the full automated suite (104 tests)
+npm test           # runs the full automated suite (106 tests)
 ```
 
 No dependencies are needed to run the app (zero-dependency static server). The only dev dependency is `jsdom`, used by the UI integration tests.
@@ -38,6 +38,7 @@ No dependencies are needed to run the app (zero-dependency static server). The o
 | `server.js` | Static server + JSON API (`/api/books`, `/api/orders`, `/api/track/:id`) backed by SQLite; the UI uses it automatically when reachable and falls back to in-browser demo data on static hosting |
 | `src/notify.js` | Owner notifications on each new order — ntfy.sh, Telegram, or a generic webhook |
 | `admin.html` | Owner's orders dashboard — live order list + status management |
+| `DEPLOY.md` | **Going-live guide** — Route A: VPS + systemd + nginx/HTTPS; Route B: Render blueprint (`render.yaml`); `.env.example` documents every setting |
 | `src/styles.css` | Styling (Inter font, 15px radius design system) |
 | `server.js` | Zero-dependency static file server |
 | `tests/core.test.js` | 50 unit tests — equivalence partitioning, boundary value analysis, decision tables |
@@ -47,6 +48,7 @@ No dependencies are needed to run the app (zero-dependency static server). The o
 | `tests/db.test.js` | 6 tests for the SQLite layer — seeding, transactional saves, rollback, persistence, order status lifecycle |
 | `tests/api.test.js` | 9 tests for the HTTP API — catalog, orders, validation, tracking, status updates, admin-key gating |
 | `tests/notify.test.js` | 5 tests for owner notifications — channel resolution, message format, failure isolation |
+| `tests/deploy.test.js` | 2 tests for deployment readiness — .env loader behaviour, deploy artifacts complete |
 | `docs/` | The complete SQE document set (below) |
 | `.github/workflows/ci.yml` | CI quality gate — the suite runs on every push |
 
@@ -62,4 +64,4 @@ No dependencies are needed to run the app (zero-dependency static server). The o
 
 ## Quality approach in one line
 
-Every rule that can break (stock limits, discount thresholds, delivery boundaries, validation) lives in pure functions in `core.js` and is proven by an automated test — including the boundary values on both sides of every threshold. Testing found **3 real defects** during development (see the defect report); all are fixed and retested. Current status: **104/104 tests passing**.
+Every rule that can break (stock limits, discount thresholds, delivery boundaries, validation) lives in pure functions in `core.js` and is proven by an automated test — including the boundary values on both sides of every threshold. Testing found **3 real defects** during development (see the defect report); all are fixed and retested. Current status: **106/106 tests passing**.
