@@ -80,7 +80,7 @@ No production dependencies are used at all, which removes an entire class of sup
 
 ## 7. Results (summary)
 
-- **60 automated tests executed: 60 passed, 0 failed** (50 unit + 10 UI integration)
+- **69 automated tests executed: 69 passed, 0 failed** (50 unit + 19 UI integration, including 9 for the v2 advanced front end: wishlist, price/rating filters, quick-view modal, dark mode, persistence)
 - **3 defects found** during development (1 by inspection, 1 during integration testing, 1 in the test tooling itself) — **all fixed and retested**, 0 open
 - **100% of functional requirements** covered by automated tests
 - Full detail: [Test Summary Report](06-test-summary-report.md) and [Defect Report](05-defect-report.md)
