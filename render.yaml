@@ -1,0 +1,29 @@
+# Render blueprint — https://render.com/docs/blueprint-spec
+# Deploy: Render dashboard -> New -> Blueprint -> pick this repo.
+#
+# NOTE (free tier): the filesystem is ephemeral, so the SQLite database
+# resets whenever the service redeploys or spins down, and free services
+# sleep when idle. Good for demos; for real orders use a Render plan
+# with a persistent disk mounted at /var/data (set BOOKKART_DB to
+# /var/data/bookkart.db) or the VPS route in DEPLOY.md.
+services:
+  - type: web
+    name: bookkart
+    runtime: node
+    plan: free
+    buildCommand: npm install --omit=dev
+    startCommand: node server.js
+    healthCheckPath: /api/books
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: BOOKKART_ADMIN_KEY
+        sync: false # set your own private value in the dashboard
+      - key: BOOKKART_NTFY_TOPIC
+        sync: false # your private ntfy topic (optional)
+      - key: BOOKKART_TELEGRAM_TOKEN
+        sync: false # optional
+      - key: BOOKKART_TELEGRAM_CHAT_ID
+        sync: false # optional
+      - key: BOOKKART_WEBHOOK_URL
+        sync: false # optional
