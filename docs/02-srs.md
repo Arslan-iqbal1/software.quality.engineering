@@ -1,6 +1,6 @@
 # Software Requirements Specification (SRS)
 
-## BookKart — Online Bookstore — Version 1.2 *(v1.1 added FR-13…FR-16; v1.2 adds payment methods FR-17 and sale pricing FR-18)*
+## BookKart — Online Bookstore — Version 1.3 *(v1.1 added FR-13…FR-16; v1.2 added FR-17/FR-18; v1.3 adds database persistence FR-19)*
 
 ### 1. Introduction
 
@@ -32,6 +32,7 @@
 | FR-16 | The cart shall persist across page reloads, and the interface shall offer a dark mode that is remembered between visits. | Low |
 | FR-17 | At checkout the customer shall choose one payment method — Cash on Delivery, Debit/Credit Card, Bank Transfer, Easypaisa or JazzCash — validated per BR-04. The order shall record the method; card numbers shall be stored and displayed masked (last 4 digits only). | High |
 | FR-18 | Each book shall display a sale price with its struck-through MRP and a computed "Save %" badge. | Medium |
+| FR-19 | When run with the Node server, the system shall persist the catalog, customers and orders in an SQLite database (seeded from the core catalog on first run). Saving an order (customer, order, line items, stock update) shall be a single transaction. The database shall be the source of truth for stock. On static hosting without the API, the system shall fall back to in-browser demo data. | High |
 
 ### 3. Business Rules
 
