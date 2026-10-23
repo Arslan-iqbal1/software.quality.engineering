@@ -3,7 +3,7 @@
 ## BookKart — Online Bookstore
 
 **Executed:** 22 October 2026 · **Environment:** Node.js v24.20.0, jsdom · **Result: all cases PASS**
-Cases TC-01…TC-30 are automated in `tests/core.test.js` and `tests/ui.test.js` (60 automated checks in total); TC-31…TC-32 are server smoke checks.
+Cases are automated in `tests/core.test.js`, `tests/ui.test.js` and `tests/ui-advanced.test.js` (69 automated checks in total), plus server smoke checks in TC-50.
 
 ### A. Catalog, Search, Filter, Sort (FR-01…FR-04)
 
@@ -79,3 +79,17 @@ Cases TC-01…TC-30 are automated in `tests/core.test.js` and `tests/ui.test.js`
 | TC-48 | Checkout success in UI | Submit valid form | Success box with order id; cart badge resets to 0 | As expected | ✅ Pass |
 | TC-49 | XSS guard (NFR-04) | Name = `<img src=x onerror=…>`, checkout | Name displayed as text; no injected element in page | As expected (after DEF-002 fix) | ✅ Pass |
 | TC-50 | Server smoke | GET /, /src/core.js, /src/app.js, /src/styles.css, /missing | 200, 200, 200, 200, 404 | As expected | ✅ Pass |
+
+### F. Advanced Front End — v2 (jsdom, fresh page)
+
+| ID | Test case | Steps | Expected result | Actual result | Status |
+|---|---|---|---|---|---|
+| TC-51 | Wishlist toggle | Click wishlist on B02 and B05 | Header wishlist count = 2 | As expected | ✅ Pass |
+| TC-52 | Wishlist-only filter | Enable "Wishlist only" | Grid shows exactly the 2 wishlisted books; disabling restores 12 | As expected | ✅ Pass |
+| TC-53 | Price filter | Set max price to Rs 1,000 | Only books ≤ Rs 1,000 shown (1); label updates; restoring shows 12 | As expected | ✅ Pass |
+| TC-54 | Minimum-rating filter | Set minimum rating 4.7 | 5 books shown (ratings 4.7–4.9) | As expected | ✅ Pass |
+| TC-55 | Reset filters | Apply a filter, click Reset | Full catalog (12) restored, controls back to defaults | As expected | ✅ Pass |
+| TC-56 | Quick-view modal | Click a book cover | Modal opens with title, description, price; Close hides it | As expected | ✅ Pass |
+| TC-57 | Add from modal + persistence | In modal set qty 2, Add to Cart | Cart badge = 2; cart saved in localStorage | As expected | ✅ Pass |
+| TC-58 | Dark mode | Click theme toggle twice | Theme switches dark → light; choice persisted | As expected | ✅ Pass |
+| TC-59 | List view toggle | Click list view, then grid view | Grid gains/loses the list-view layout class | As expected | ✅ Pass |
