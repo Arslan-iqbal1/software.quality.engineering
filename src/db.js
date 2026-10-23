@@ -58,6 +58,7 @@ CREATE TABLE IF NOT EXISTS orders (
   payment_method TEXT NOT NULL,
   payment_label TEXT NOT NULL,
   payment_detail TEXT NOT NULL DEFAULT '',
+  status TEXT NOT NULL DEFAULT 'Placed',
   placed_at TEXT NOT NULL
 );
 CREATE TABLE IF NOT EXISTS order_items (
@@ -85,6 +86,11 @@ function openDb(dbPath) {
   const db = new DatabaseSync(dbPath);
   db.exec('PRAGMA foreign_keys = ON;');
   db.exec(SCHEMA);
+  // Migration: databases created before order tracking gain the column.
+  const orderCols = db.prepare('PRAGMA table_info(orders)').all().map((r) => r.name);
+  if (!orderCols.includes('status')) {
+    db.exec("ALTER TABLE orders ADD COLUMN status TEXT NOT NULL DEFAULT 'Placed'");
+  }
 
   // Seed the catalog once; afterwards the DB owns stock and prices.
   const count = db.prepare('SELECT COUNT(*) AS n FROM books').get().n;
@@ -165,6 +171,7 @@ function openDb(dbPath) {
       items,
       totals: { subtotal: o.subtotal, discount: o.discount, deliveryFee: o.delivery, total: o.total },
       promoCode: o.promo_code,
+      status: o.status,
       payment: { method: o.payment_method, label: o.payment_label, detail: o.payment_detail },
       placedAt: o.placed_at
     };
@@ -172,10 +179,19 @@ function openDb(dbPath) {
 
   function listOrders() {
     return db.prepare(
-      'SELECT o.id, o.total, o.payment_method, o.placed_at, c.name AS customer, ' +
+      'SELECT o.id, o.total, o.payment_method, o.status, o.placed_at, c.name AS customer, ' +
       '(SELECT COUNT(*) FROM order_items i WHERE i.order_id = o.id) AS items ' +
       'FROM orders o JOIN customers c ON c.id = o.customer_id ORDER BY o.placed_at DESC, o.id DESC'
     ).all();
+  }
+
+  const ORDER_STATUSES = ['Placed', 'Confirmed', 'Dispatched', 'Delivered', 'Cancelled'];
+
+  function updateOrderStatus(id, status) {
+    if (!ORDER_STATUSES.includes(status)) throw new Error('INVALID_STATUS');
+    const info = db.prepare('UPDATE orders SET status = ? WHERE id = ?').run(status, id);
+    if (info.changes === 0) return null;
+    return getOrder(id);
   }
 
   return {
@@ -184,8 +200,10 @@ function openDb(dbPath) {
     saveOrder,
     getOrder,
     listOrders,
+    updateOrderStatus,
+    ORDER_STATUSES,
     close: () => db.close()
   };
 }
 
-module.exports = { openDb };
+module.exports = { openDb, ORDER_STATUSES: ['Placed', 'Confirmed', 'Dispatched', 'Delivered', 'Cancelled'] };
