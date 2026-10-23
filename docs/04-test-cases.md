@@ -3,7 +3,7 @@
 ## BookKart — Online Bookstore
 
 **Executed:** 22 October 2026 · **Environment:** Node.js v24.20.0, jsdom · **Result: all cases PASS**
-Cases are automated in `tests/core.test.js`, `tests/ui.test.js` and `tests/ui-advanced.test.js` (104 automated checks in total), plus server smoke checks in TC-50.
+Cases are automated in `tests/core.test.js`, `tests/ui.test.js` and `tests/ui-advanced.test.js` (106 automated checks in total), plus server smoke checks in TC-50.
 
 ### A. Catalog, Search, Filter, Sort (FR-01…FR-04)
 
@@ -141,3 +141,10 @@ Cases are automated in `tests/core.test.js`, `tests/ui.test.js` and `tests/ui-ad
 | TC-90 | Status lifecycle | New order → Confirmed → Delivered; invalid status; unknown order | Defaults to Placed; valid updates stored; invalid rejected; unknown → null | As expected | ✅ Pass |
 | TC-91 | Tracking privacy | GET /api/track/:id with right phone, wrong phone, unknown id | Right phone → status + summary; wrong phone and unknown id → 404 | As expected | ✅ Pass |
 | TC-92 | Status API + admin gate | PATCH status; repeat with BOOKKART_ADMIN_KEY set, with/without the header | Update succeeds and tracking reflects it; gated calls without the key → 401, with it → 200 | As expected | ✅ Pass |
+
+### J. Deployment Readiness — v6
+
+| ID | Test case | Input / steps | Expected result | Actual result | Status |
+|---|---|---|---|---|---|
+| TC-93 | .env loader | Temp .env with comments, quoted and spaced values; one var pre-set in the real env | Missing vars loaded (quotes stripped); the real environment value is never overridden; a missing .env file does not throw | As expected | ✅ Pass |
+| TC-94 | Deploy artifacts complete | Read DEPLOY.md, render.yaml, .env.example, deploy/bookkart.service | All exist; render.yaml start command + health check present; .env.example documents all 7 variables; systemd unit has ExecStart + Restart=always; guide covers both routes incl. HTTPS | As expected | ✅ Pass |
