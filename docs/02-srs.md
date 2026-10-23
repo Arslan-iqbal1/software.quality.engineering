@@ -1,6 +1,6 @@
 # Software Requirements Specification (SRS)
 
-## BookKart — Online Bookstore — Version 1.1 *(v1.1 adds the advanced front-end requirements FR-13…FR-16)*
+## BookKart — Online Bookstore — Version 1.2 *(v1.1 added FR-13…FR-16; v1.2 adds payment methods FR-17 and sale pricing FR-18)*
 
 ### 1. Introduction
 
@@ -30,6 +30,8 @@
 | FR-14 | The system shall provide a wishlist: customers can mark/unmark books, see a wishlist count, and filter the catalog to wishlist items; the wishlist shall persist across page reloads. | Medium |
 | FR-15 | The system shall provide a quick-view panel for each book showing its description, year, page count, rating and stock, with quantity selection and add-to-cart. | Medium |
 | FR-16 | The cart shall persist across page reloads, and the interface shall offer a dark mode that is remembered between visits. | Low |
+| FR-17 | At checkout the customer shall choose one payment method — Cash on Delivery, Debit/Credit Card, Bank Transfer, Easypaisa or JazzCash — validated per BR-04. The order shall record the method; card numbers shall be stored and displayed masked (last 4 digits only). | High |
+| FR-18 | Each book shall display a sale price with its struck-through MRP and a computed "Save %" badge. | Medium |
 
 ### 3. Business Rules
 
@@ -54,6 +56,15 @@ Percentage discounts are rounded to the nearest rupee. A flat discount never exc
 | Phone | Pakistani mobile: 11 digits starting `03`; spaces and dashes are ignored |
 | Address | At least 10 characters after trimming |
 | City | At least 3 characters after trimming |
+
+**BR-04 — Payment validation**
+
+| Method | Validation rules |
+|---|---|
+| Cash on Delivery | No extra data required |
+| Debit/Credit Card | Name on card ≥ 3 chars; number 13–19 digits passing the Luhn check; expiry in MM/YY format and not in the past; CVV 3–4 digits |
+| Bank Transfer | No extra data required; transfer instructions and order-ID reference shown after ordering |
+| Easypaisa / JazzCash | Mobile account number: 11 digits starting `03` (spaces/dashes ignored) |
 
 ### 4. Non-Functional Requirements
 
