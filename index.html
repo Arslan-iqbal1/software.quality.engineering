@@ -1,9 +1,11 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="BookKart — online bookstore. Browse, search and order books with cash on delivery across Pakistan.">
   <title>BookKart — Online Bookstore</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📚</text></svg>">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="src/styles.css">
@@ -11,44 +13,101 @@
 <body>
   <header class="site-header">
     <div class="wrap header-inner">
-      <div class="logo">📚 BookKart</div>
-      <button id="cartButton" class="btn cart-btn" aria-label="Open cart">
-        Cart <span id="cartCount" class="count">0</span>
-      </button>
+      <a class="logo" href="#">📚 BookKart</a>
+      <div class="header-search">
+        <input id="searchInput" type="search" placeholder="Search by title or author…" aria-label="Search books">
+      </div>
+      <div class="header-actions">
+        <button id="themeToggle" class="icon-btn" aria-label="Toggle dark mode" title="Dark mode">🌙</button>
+        <button id="wishButton" class="icon-btn" aria-label="Wishlist" title="Wishlist only">♥ <span id="wishCount" class="count alt">0</span></button>
+        <button id="cartButton" class="btn cart-btn" aria-label="Open cart">
+          🛒 Cart <span id="cartCount" class="count">0</span>
+        </button>
+      </div>
     </div>
   </header>
 
-  <section class="hero wrap">
-    <h1>Find your next great read</h1>
-    <p>Fiction, science, technology and more — delivered to your doorstep across Pakistan.</p>
+  <section class="hero">
+    <div class="wrap">
+      <h1>Find your next great read</h1>
+      <p>Fiction, science, technology and more — delivered to your doorstep across Pakistan. Cash on delivery.</p>
+      <div class="chips">
+        <span class="chip">🏷️ STUDENT10 — 10% off</span>
+        <span class="chip">🏷️ BOOKWORM20 — 20% off over Rs 2,000</span>
+        <span class="chip">🚚 Free delivery over Rs 1,000</span>
+      </div>
+    </div>
   </section>
 
-  <section class="wrap controls">
-    <input id="searchInput" type="search" placeholder="Search by title or author…" aria-label="Search books">
-    <select id="genreSelect" aria-label="Filter by genre">
-      <option value="All">All genres</option>
-      <option>Fiction</option>
-      <option>Self-Help</option>
-      <option>Science</option>
-      <option>Technology</option>
-      <option>History</option>
-      <option>Poetry</option>
-      <option>Finance</option>
-    </select>
-    <select id="sortSelect" aria-label="Sort books">
-      <option value="featured">Sort: Featured</option>
-      <option value="price-asc">Price: Low to High</option>
-      <option value="price-desc">Price: High to Low</option>
-      <option value="rating-desc">Top Rated</option>
-      <option value="title-asc">Title: A to Z</option>
-    </select>
-  </section>
+  <div class="wrap layout">
+    <aside id="sidebar" class="sidebar" aria-label="Filters">
+      <div class="side-head">
+        <h2>Filters</h2>
+        <button id="resetFilters" class="btn ghost sm">Reset</button>
+      </div>
 
-  <main class="wrap">
-    <p id="resultInfo" class="result-info" role="status"></p>
-    <div id="bookGrid" class="grid"></div>
-    <p id="emptyState" class="empty" hidden>No books match your search. Try a different title, author or genre.</p>
-  </main>
+      <label class="f-label" for="genreSelect">Genre</label>
+      <select id="genreSelect" class="f-control">
+        <option value="All">All genres</option>
+        <option>Fiction</option>
+        <option>Self-Help</option>
+        <option>Science</option>
+        <option>Technology</option>
+        <option>History</option>
+        <option>Poetry</option>
+        <option>Finance</option>
+      </select>
+
+      <label class="f-label" for="priceRange">Max price · <span id="priceLabel">Rs 5,500</span></label>
+      <input id="priceRange" type="range" min="900" max="5500" step="100" value="5500" class="f-control">
+
+      <label class="f-label" for="ratingSelect">Minimum rating</label>
+      <select id="ratingSelect" class="f-control">
+        <option value="0">Any rating</option>
+        <option value="4.3">4.3 & up</option>
+        <option value="4.5">4.5 & up</option>
+        <option value="4.7">4.7 & up</option>
+      </select>
+
+      <label class="f-check"><input id="stockToggle" type="checkbox"> In stock only</label>
+      <label class="f-check"><input id="wishOnlyToggle" type="checkbox"> Wishlist only</label>
+
+      <div class="side-note">
+        <strong>Quality promise</strong>
+        <p>Every price, discount and stock rule in this store is covered by automated tests — 60+ checks run on every change.</p>
+      </div>
+    </aside>
+
+    <main class="main-col">
+      <div class="toolbar">
+        <p id="resultInfo" class="result-info" role="status"></p>
+        <div class="toolbar-right">
+          <button id="filtersToggle" class="btn sm only-mobile">Filters</button>
+          <select id="sortSelect" aria-label="Sort books">
+            <option value="featured">Sort: Featured</option>
+            <option value="price-asc">Price: Low to High</option>
+            <option value="price-desc">Price: High to Low</option>
+            <option value="rating-desc">Top Rated</option>
+            <option value="title-asc">Title: A to Z</option>
+          </select>
+          <div class="view-toggle" role="group" aria-label="View">
+            <button id="viewGrid" class="btn sm active" aria-label="Grid view">▦</button>
+            <button id="viewList" class="btn sm" aria-label="List view">☰</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="bookGrid" class="grid"></div>
+      <p id="emptyState" class="empty" hidden>No books match your filters. Try a different search, genre or price range.</p>
+    </main>
+  </div>
+
+  <div id="bookModal" class="modal" hidden>
+    <div class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <button id="closeModal" class="btn ghost modal-x" aria-label="Close">✕</button>
+      <div id="modalContent"></div>
+    </div>
+  </div>
 
   <div id="cartDrawer" class="drawer" hidden>
     <div class="drawer-panel">
@@ -91,8 +150,23 @@
     </div>
   </div>
 
-  <footer class="site-footer wrap">
-    <p>BookKart — a Software Quality Engineering project. Quality built in, not bolted on.</p>
+  <div id="toast" class="toast-wrap" aria-live="polite"></div>
+
+  <footer class="site-footer">
+    <div class="wrap foot-grid">
+      <div>
+        <div class="logo">📚 BookKart</div>
+        <p>A Software Quality Engineering project — quality built in, not bolted on.</p>
+      </div>
+      <div>
+        <h4>Promo codes</h4>
+        <p>STUDENT10 · 10% off<br>BOOKWORM20 · 20% off ≥ Rs 2,000<br>FLAT150 · Rs 150 off ≥ Rs 1,500</p>
+      </div>
+      <div>
+        <h4>Good to know</h4>
+        <p>Cash on delivery<br>Free delivery ≥ Rs 1,000<br>Stock-checked cart — no overselling</p>
+      </div>
+    </div>
   </footer>
 
   <script src="src/core.js"></script>
